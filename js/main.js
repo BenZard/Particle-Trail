@@ -1,12 +1,12 @@
-  var camera, tick = 0,
-      scene, renderer, clock = new THREE.Clock(true),
-      controls, container, gui = new dat.GUI(),
+  var camera, tick = 0, cubeColor = 0x8dc63f, cubeScale = 1,
+      scene, renderer, particleRate = 20, clock = new THREE.Clock(true),
       options, spawnerOptions, particleSystem;
 
     init();
     animate();
 
-    function init() {
+    function init() 
+    {
 
 
       container = document.createElement('div');
@@ -22,85 +22,60 @@
       // relative to the position of the particle system, but you will probably only need one
       // system for your whole scene
       particleSystem = new THREE.GPUParticleSystem({
-        maxParticles: 250000
+        maxParticles: 500
       });
       scene.add( particleSystem);
 
 
       // options passed during each spawned
-      options = {
+      options = 
+      {
         position: new THREE.Vector3(),
-        positionRandomness: .3,
+        positionRandomness: cubeScale,
         velocity: new THREE.Vector3(),
-        velocityRandomness: .5,
-        color: 0xaa88ff,
+        velocityRandomness: 2.5,
+        color: cubeColor,
         colorRandomness: .2,
-        turbulence: .5,
-        lifetime: 2,
-        size: 5,
-        sizeRandomness: 1
+        turbulence: 4,
+        lifetime: 1,
+        size: 2,
+        sizeRandomness: 1.4
       };
 
-      spawnerOptions = {
-        spawnRate: 15000,
-        horizontalSpeed: 1.5,
-        verticalSpeed: 1.33,
+      spawnerOptions = 
+      {
+        spawnRate: particleRate,
+        horizontalSpeed: 0,
+        verticalSpeed: 0,
         timeScale: 1
       }
-
-      gui.add(options, "velocityRandomness", 0, 3);
-      gui.add(options, "positionRandomness", 0, 3);
-      gui.add(options, "size", 1, 20);
-      gui.add(options, "sizeRandomness", 0, 25);
-      gui.add(options, "colorRandomness", 0, 1);
-      gui.add(options, "lifetime", .1, 10);
-      gui.add(options, "turbulence", 0, 1);
-
-      gui.add(spawnerOptions, "spawnRate", 10, 30000);
-      gui.add(spawnerOptions, "timeScale", -1, 1);
 
       renderer = new THREE.WebGLRenderer();
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(window.innerWidth, window.innerHeight);
       container.appendChild(renderer.domElement);
 
-      // setup controls
-      controls = new THREE.TrackballControls(camera, renderer.domElement);
-      controls.rotateSpeed = 5.0;
-      controls.zoomSpeed = 2.2;
-      controls.panSpeed = 1;
-      controls.dynamicDampingFactor = 0.3;
-
-      window.addEventListener('resize', onWindowResize, false);
-
+  
     }
 
-    function onWindowResize() {
-
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-
-      renderer.setSize(window.innerWidth, window.innerHeight);
-
-    }
-
-    function animate() {
-
+    function animate()
+    {
       requestAnimationFrame(animate);
 
-      controls.update();
-
       var delta = clock.getDelta() * spawnerOptions.timeScale;
-      tick += delta;
+      tick += delta/100;
 
+	  console.log(tick);
       if (tick < 0) tick = 0;
 
-      if (delta > 0) {
-        options.position.x = Math.sin(tick * spawnerOptions.horizontalSpeed) * 20;
-        options.position.y = Math.sin(tick * spawnerOptions.verticalSpeed) * 10;
-        options.position.z = Math.sin(tick * spawnerOptions.horizontalSpeed + spawnerOptions.verticalSpeed) * 5;
+      if (delta > 0) 
+      {
+        options.position.x = Math.sin(2 * spawnerOptions.horizontalSpeed);
+        options.position.y = Math.sin(2 * spawnerOptions.verticalSpeed);
+        options.position.z = Math.sin(2 * spawnerOptions.horizontalSpeed + spawnerOptions.verticalSpeed);
 
-        for (var x = 0; x < spawnerOptions.spawnRate * delta; x++) {
+        for (var x = 0; x < spawnerOptions.spawnRate * delta; x++) 
+        {
           // Yep, that's really it.  Spawning particles is super cheap, and once you spawn them, the rest of
           // their lifecycle is handled entirely on the GPU, driven by a time uniform updated below
           particleSystem.spawnParticle(options);
